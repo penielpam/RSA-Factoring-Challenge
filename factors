@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Calculate factors of numbers
+
+calculate_factors() {
+    if [ $# -ne 3 ]; then
+        args=("$@")
+        count=0
+        product=1
+        for arg in "${args[@]}"; do
+            if [ $count -gt 1 ]; then
+                product=$(echo "$arg * $product" | bc)
+            fi
+            count=$((count + 1))
+        done
+    else
+        product=$3
+    fi
+
+    num1=$2
+    num_repr=$(echo "$1" | tr ':' '=')
+
+    result=$(echo "if ($product > $num1) 1 else 0" | bc)
+    if ((result == 1)); then
+        temp=$num1
+        num1=$product
+        product=$temp
+    fi
+
+    echo "$num_repr$num1*$product"
+}
+
+if [ $# -ne 1 ]; then
+    echo 'Usage: calculate_factors <file>'
+    exit 1
+else
+    while read number; do
+        factorization=$(factor "$number")
+        calculate_factors $factorization
+    done < "$1"
+fi
+
