@@ -1,14 +1,21 @@
 #!/usr/bin/env bash
-# Factorization Challenge
+# Factorize natural numbers into a product of two smaller numbers.
 
 calculate_factors() {
     num=$1
-    factors=$(factor "$num" | cut -d ':' -f 2-)
-    echo "$num = $factors"
+    p=2
+    while [ $p -le $num ]; do
+        if [ $((num % p)) -eq 0 ]; then
+            q=$((num / p))
+            echo "$num=$p*$q"
+            break
+        fi
+        p=$((p + 1))
+    done
 }
 
 if [ $# -ne 1 ]; then
-    echo 'Usage: script_name <file>'
+    echo 'Usage: factors <file>'
     exit 1
 else
     input_file="$1"
