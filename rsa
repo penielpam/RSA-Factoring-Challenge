@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 
-check_factor() {
-    if [ $# -ne 3 ]; then
-        args=("$@")
+# Function to check if a number is a factor of another number
+check_factor()
+{
+    if [ $# -ne 3 ];
+    then
+        arguments=("$@")
         count=0
         num2=1
-        for a in "${args[@]}"; do
-            if [ $count -gt 1 ]; then
-                num2=$(bc -l <<< "$a * $num2")
+        for arg in "${arguments[@]}";
+        do
+            if [ $count -gt 1 ];
+            then
+                num2=$(echo "$arg*$num2" | bc)
             fi
             count=$((count + 1))
         done
@@ -16,24 +21,27 @@ check_factor() {
     fi
 
     num1=$2
-    num=$(echo "$1" | tr ':' '=')
+    formatted_num=$(echo "$1" | tr ':' '=')
 
-    result=$(bc -l <<< "if ($num2 > $num1) 1 else 0")
+    result=$(echo "if($num2 > $num1) 1 else 0" | bc)
     if ((result == 1)); then
-        numcp=$num1
+        temp_num=$num1
         num1=$num2
-        num2=$numcp
+        num2=$temp_num
     fi
 
-    echo "$num$num1*$num2"
+    echo "$formatted_num$num1*$num2"
 }
 
-if [ $# -ne 1 ]; then
+if [ $# -ne 1 ]
+then
     echo 'Usage: factor_checker <file>'
     exit 1
 else
-    while read -r i; do
-        result=$(factor "$i")
+    while read input
+    do
+        result=$(factor "$input")
         check_factor $result
     done < "$1"
 fi
+
