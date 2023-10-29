@@ -1,23 +1,43 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# Function to check if a number is a factor of another number
+factor_check() {
+    if [ $# -ne 3 ]; then
+        arguments=("$@")
+        index=0
+        factor_product=1
+
+        for arg in "${arguments[@]}"; do
+            if [ $index -gt 1 ]; then
+                factor_product=$(echo "$arg*$factor_product" | bc)
+            fi
+            index=$((index + 1))
+        done
+    else
+        factor_product=$3
+    fi
+
+    num1=$2
+    num_as_string=$(echo "$1" | tr ':' '=')
+
+    result=$(echo "if($factor_product > $num1) 1 else 0" | bc)
+    if ((result == 1)); then
+        temp_num=$num1
+        num1=$factor_product
+        factor_product=$temp_num
+    }
+
+    echo "$num_as_string$num1*$factor_product"
+}
 
 if [ $# -ne 1 ]; then
-    echo "Usage: $0 <file>"
+    echo 'Usage: factor_checker <file>'
     exit 1
+else
+    while read line
+    do
+        factorization=$(factor "$line")
+        factor_check $factorization
+    done < "$1"
 fi
-
-input_file="$1"
-
-while read -r number; do
-    factorize=""
-    n=$number
-
-    for ((i = 2; i <= n / 2; i++)); do
-        if ((n % i == 0)); then
-            factorize="$i*$((n / i))"
-            break
-        fi
-    done
-
-    echo "$n=$factorize"
-done < "$input_file"
 
