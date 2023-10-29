@@ -1,31 +1,41 @@
 #!/usr/bin/env bash
-# Factorize natural numbers into a product of two smaller numbers.
+# Factors Checker
 
-calculate_factors() {
-    num=$1
-    p=2
-    while [ $p -le $num ]; do
-        if [ $((num % p)) -eq 0 ]; then
-            q=$((num / p))
-            echo "$num=$p*$q"
-            break
-        fi
-        p=$((p + 1))
-    done
+check_factors() {
+    if [ $# -ne 3 ]; then
+        args=("$@")
+        count=0
+        num2=1
+        for a in ${args[*]}; do
+            if [ $count -gt 1 ]; then
+                num2=$(echo $a*$num2 | bc)
+            fi
+            count=$((count + 1))
+        done
+    else
+        num2=$3
+    fi
+
+    num1=$2
+    num=$(echo "$1" | tr ':' '=')
+
+    result=$(echo "if($num2 > $num1) 1 else 0" | bc)
+    if ((result == 1)); then
+        numcp=$num1
+        num1=$num2
+        num2=$numcp
+    fi
+
+    echo "$num$num1*$num2"
 }
 
 if [ $# -ne 1 ]; then
-    echo 'Usage: factors <file>'
+    echo 'Usage: factor_checker <file>'
     exit 1
 else
-    input_file="$1"
-
-    if [ ! -f "$input_file" ]; then
-        echo "File not found: $input_file"
-        exit 1
-    fi
-
-    while read -r number; do
-        calculate_factors "$number"
-    done < "$input_file"
+    while read i; do
+        result=$(factor "$i")
+        check_factors $result
+    done < "$1"
 fi
+
