@@ -1,41 +1,39 @@
 #!/usr/bin/env bash
 
-is_prime() {
-    number=$1
-    if [ $number -le 1 ]; then
-        return 1
+check_factor() {
+    if [ $# -ne 3 ]; then
+        args=("$@")
+        count=0
+        num2=1
+        for a in "${args[@]}"; do
+            if [ $count -gt 1 ]; then
+                num2=$(bc -l <<< "$a * $num2")
+            fi
+            count=$((count + 1))
+        done
+    else
+        num2=$3
     fi
 
-    for ((i = 2; i * i <= number; i++)); do
-        if [ $((number % i)) -eq 0 ]; then
-            return 1
-        fi
-    done
+    num1=$2
+    num=$(echo "$1" | tr ':' '=')
 
-    return 0
-}
+    result=$(bc -l <<< "if ($num2 > $num1) 1 else 0")
+    if ((result == 1)); then
+        numcp=$num1
+        num1=$num2
+        num2=$numcp
+    fi
 
-find_prime_factors() {
-    n=$1
-    for ((p = 2; p <= n / 2; p++)); do
-        if is_prime "$p"; then
-            q=$((n / p))
-            if [ $((p * q)) -eq $n ] && is_prime "$q"; then
-                echo "$n=$p*$q"
-                return
-            fi
-        fi
-    done
-
-    echo "No prime factors found for $n"
+    echo "$num$num1*$num2"
 }
 
 if [ $# -ne 1 ]; then
-    echo 'Usage: rsa <file>'
+    echo 'Usage: factor_checker <file>'
     exit 1
 else
-    while read -r n; do
-        find_prime_factors "$n"
+    while read -r i; do
+        result=$(factor "$i")
+        check_factor $result
     done < "$1"
 fi
-
